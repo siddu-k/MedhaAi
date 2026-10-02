@@ -52,7 +52,7 @@ export default function CounsellingCall({ onNav }) {
     const {
         exitInterview, setCurrentPage, setPendingUserPrompt,
         userName, messages, createSession, currentSession,
-        lang, setLang,
+        lang, setLang, interviewStarted, setInterviewStarted,
     } = useAppStore();
     const [tab, setTab] = useState('chat');
     const [muted, setMuted] = useState(false);
@@ -61,6 +61,17 @@ export default function CounsellingCall({ onNav }) {
     const [moreOpen, setMoreOpen] = useState(false);
     const [showEscalation, setShowEscalation] = useState(false);
     const [isCallMode, setIsCallMode] = useState(true);
+
+    // Warm greeting when the family room opens fresh
+    useEffect(() => {
+        if (interviewStarted && messages.length === 0) {
+            setInterviewStarted(false);
+            setPendingUserPrompt({
+                prompt: `Namaste! Please greet us warmly as Medha, introduce yourself in 2 short sentences, and ask one opening question: who is here today (student, mother, father?) and which class or trade is on their mind?`,
+                autoSend: true,
+            });
+        }
+    }, []);
 
     const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant' && m.content?.trim());
     const captionText = (lastAssistant?.content || '')
@@ -180,7 +191,7 @@ export default function CounsellingCall({ onNav }) {
                             </span>
                         </div>
                         {captionsOn && captionText && (
-                            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 max-w-[80%] px-3 py-1.5 rounded-lg text-[11.5px] text-white text-center" style={{ background: 'rgba(0,0,0,0.55)' }}>
+                            <div className="absolute top-3 left-1/2 -translate-x-1/2 max-w-[80%] px-3 py-1.5 rounded-lg text-[11.5px] text-white text-center" style={{ background: 'rgba(0,0,0,0.55)' }}>
                                 {captionText}
                             </div>
                         )}

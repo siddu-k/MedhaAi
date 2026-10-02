@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { signOutUser } from '../services/firebaseService';
 
 // Helper to load from localStorage
 const loadStorage = (key, defaultValue) => {
@@ -28,6 +29,11 @@ const useAppStore = create((set, get) => ({
         return stored || 'gemini-3.5-flash-lite';
     })(),
     aiProvider: loadStorage('tyloop_ai_provider', 'gemini'), // 'gemini' | 'local'
+    // ─── Auth (Firebase Google login, or Guest) ───
+    authUser: null, // { uid, name, email, photo } when logged in with Google
+    authReady: false,
+    setAuthUser: (user) => set({ authUser: user }),
+    setAuthReady: (ready) => set({ authReady: ready }),
     lang: loadStorage('medha_lang', 'en'), // 'en' | 'hi'
     setLang: (lang) => {
         set({ lang });
@@ -604,14 +610,16 @@ const useAppStore = create((set, get) => ({
     // Mocks for compatibility
     initAuth: () => set({ authLoading: false }),
     signOut: () => {
+        try { signOutUser(); } catch (e) {}
         localStorage.clear();
         set({
             userName: null,
-            selectedModel: 'qwen2.5-coder:7b',
+            authUser: null,
+            selectedModel: 'gemini-3.5-flash-lite',
             sessions: [],
             currentSession: null,
             messages: [],
-            currentPage: 'dashboard'
+            currentPage: 'landing'
         });
     }
 }));

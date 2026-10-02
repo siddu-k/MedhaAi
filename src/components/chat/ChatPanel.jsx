@@ -3,7 +3,7 @@ import useAppStore from '../../stores/appStore';
 import ChatMessage from './ChatMessage';
 import ImageUpload from './ImageUpload';
 import VoiceControls from '../voice/VoiceControls';
-import { streamChat, fileToBase64, extractMermaidDiagram, listLocalModels } from '../../services/aiService';
+import { streamChat, fileToBase64, extractMermaidDiagram, listLocalModels, isGeminiModel } from '../../services/aiService';
 import { counsellingPromptWith } from '../../services/geminiService';
 import { getOutcomeContext, detectObjection, matchDistrict } from '../../services/outcomeService';
 import { logObjection, logSession, getDistrict, setDistrict } from '../../services/engagementLog';
@@ -78,6 +78,9 @@ export default function ChatPanel({ hideHero = false, isCallMode = false, setIsC
     }, [messages, isAiTyping]);
 
     useEffect(() => {
+        // Only ping localhost Ollama when a local model is actually selected —
+        // otherwise this just spams ERR_CONNECTION_REFUSED in the console.
+        if (isGeminiModel(selectedModel)) return;
         if (!localModels || localModels.length === 0) {
             listLocalModels().then((m) => { if (m?.length) setLocalModels(m); }).catch(() => {});
         }

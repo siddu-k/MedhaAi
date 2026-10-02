@@ -1,3 +1,5 @@
+import { signOutUser, saveTicketCloud, logEventCloud } from './firebaseService';
+
 const LOG_KEY = 'medha_engagement_log';
 const TICKET_KEY = 'medha_escalation_tickets';
 const DISTRICT_KEY = 'medha_district';
@@ -21,6 +23,7 @@ export function logEvent(event) {
     const log = read(LOG_KEY, []);
     log.push({ at: new Date().toISOString(), ...event });
     write(LOG_KEY, log.slice(-2000));
+    try { logEventCloud(event); } catch (e) {}
 }
 
 export function logSession(sessionId, district) {
@@ -58,6 +61,7 @@ export function createTicket({ name, phone, district, reason, sessionId, transcr
     tickets.unshift(ticket);
     write(TICKET_KEY, tickets);
     logEvent({ kind: 'escalation', ticketId: ticket.id, objection: reason, district: ticket.district, sessionId });
+    try { saveTicketCloud(ticket); } catch (e) {}
     return ticket;
 }
 
