@@ -4,6 +4,7 @@ import LandingPage from './pages/LandingPage';
 import SettingsPage from './pages/SettingsPage';
 import DoubtPage from './pages/DoubtPage';
 import AdminDashboard from './pages/AdminDashboard';
+import ErrorBoundary from './components/ui/ErrorBoundary';
 import useAppStore from './stores/appStore';
 import { watchAuth } from './services/firebaseService';
 
@@ -26,13 +27,13 @@ export default function App() {
 
     switch (currentPage) {
         case 'settings':
-            return <SettingsPage />;
+            return <ErrorBoundary name="settings"><SettingsPage /></ErrorBoundary>;
         case 'doubt':
-            return <DoubtPage />;
+            return <ErrorBoundary name="setup guide"><DoubtPage /></ErrorBoundary>;
         case 'admin':
-            return <AdminDashboard />;
+            return <ErrorBoundary name="admin"><AdminDashboard /></ErrorBoundary>;
         case 'dashboard':
         default:
-            return <DashboardPage />;
+            return <ErrorBoundary name="dashboard"><DashboardPage /></ErrorBoundary>;
     }
 }

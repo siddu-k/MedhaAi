@@ -66,6 +66,12 @@ export default function LandingPage() {
                 <div className="w-full max-w-[420px] rounded-3xl bg-[#fffdf5] p-8 shadow-xl relative" style={{ border: '1px solid #efdfc2' }}>
                     {!showLogin ? (
                         <>
+                            <img
+                                src="/art/hero-medha.png"
+                                alt="Medha — careers in motion"
+                                className="w-full h-[120px] object-cover object-center rounded-2xl mb-5"
+                                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                            />
                             <input
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}

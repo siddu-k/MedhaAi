@@ -33,6 +33,7 @@ export default function Sidebar({ activeNav = 'home', onNav = null }) {
         createSession, signOut, setCurrentPage, userName,
         setPendingUserPrompt,
     } = useAppStore();
+    const lang = useAppStore((s) => s.lang);
 
     const handleNewChat = async () => {
         await createSession();
@@ -113,7 +114,7 @@ export default function Sidebar({ activeNav = 'home', onNav = null }) {
                         </button>
                         <button onClick={() => useAppStore.getState().setLang(useAppStore.getState().lang === 'hi' ? 'en' : 'hi')} className="w-full flex items-center gap-3 px-3 py-[9px] rounded-[10px] text-[13.5px]" style={{ color: '#f0d9b5' }}>
                             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#e8a83e" strokeWidth="2"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/></svg>
-                            Language <span className="ml-auto text-[12px] opacity-70">{useAppStore((s) => s.lang) === 'hi' ? 'HI ›' : 'EN ›'}</span>
+                            Language <span className="ml-auto text-[12px] opacity-70">{lang === 'hi' ? 'HI ›' : 'EN ›'}</span>
                         </button>
                     </div>
                     <div className="flex items-center gap-2.5 px-2 py-2.5" style={{ borderTop: '1px solid rgba(240,217,181,0.2)' }}>

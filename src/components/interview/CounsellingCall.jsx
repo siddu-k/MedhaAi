@@ -1,22 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import useAppStore from '../../stores/appStore';
+import Sidebar from '../ui/Sidebar';
 import ChatPanel from '../chat/ChatPanel';
 import MedhaAvatar from '../avatar/MedhaAvatar';
 import UserVideo from './UserVideo';
 import EscalationModal from '../escalation/EscalationModal';
 import { stopSpeaking } from '../../services/voiceService';
 
-const RAIL = [
-    { id: 'home', label: 'Home', icon: (<svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l9 8h-3v9h-4v-6H10v6H6v-9H3z" /></svg>) },
-    { id: 'explore', label: 'Search', icon: (<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg>) },
-    { id: 'compare', label: 'Compare', icon: (<svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="12" width="3.5" height="8" rx="1" /><rect x="10.2" y="7" width="3.5" height="13" rx="1" /><rect x="16.5" y="3" width="3.5" height="17" rx="1" /></svg>) },
-    { id: 'earnings', label: 'Jobs', icon: (<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2" /></svg>) },
-    { id: 'roadmap', label: 'Learn', icon: (<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 9L12 4 2 9l10 5 10-5z" /><path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5" /></svg>) },
-    { id: 'resources', label: 'Library', icon: (<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19V5a2 2 0 012-2h13v16H6a2 2 0 00-2 2zm0 0a2 2 0 002 2h13" /></svg>) },
-    { id: 'family', label: 'Family', icon: (<svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><circle cx="8" cy="8" r="3" /><circle cx="16.5" cy="9" r="2.5" /><path d="M2 20c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" /></svg>) },
-];
-
 const QUICK = ['Show career options', 'Compare roles', 'Required skills', 'Roadmap for each role'];
+
 
 const RESOURCES = [
     { name: 'Skill India Portal', desc: 'Courses, ITIs & PMKVY schemes', url: 'https://www.skillindia.gov.in' },
@@ -48,7 +40,7 @@ function CtrlBtn({ label, active, danger, onClick, children }) {
     );
 }
 
-export default function CounsellingCall({ onNav }) {
+export default function CounsellingCall({ onNav, activeNav = 'family' }) {
     const {
         exitInterview, setCurrentPage, setPendingUserPrompt,
         userName, messages, createSession, currentSession,
@@ -89,22 +81,13 @@ export default function CounsellingCall({ onNav }) {
         setCurrentPage('dashboard');
     };
 
-    const railNav = (id) => {
-        if (id === 'home') { goHome('home'); return; }
-        const prompts = {
-            explore: 'Explore vocational careers suitable for me',
-            compare: 'Compare two trades for me',
-            earnings: 'Show verified earnings for ITI trades',
-            roadmap: 'Create my career roadmap',
-            resources: 'Show government skilling resources',
-            family: 'My parents have concerns about vocational careers',
-        };
-        stopSpeaking();
-        setIsCallMode(false);
-        exitInterview();
+    const sidebarNav = (id) => {
+        if (id !== 'family') {
+            stopSpeaking();
+            setIsCallMode(false);
+            exitInterview();
+        }
         if (onNav) onNav(id);
-        setCurrentPage('dashboard');
-        if (prompts[id]) setPendingUserPrompt({ prompt: prompts[id], autoSend: id !== 'home' });
     };
 
     const downloadTranscript = () => {
@@ -119,36 +102,7 @@ export default function CounsellingCall({ onNav }) {
 
     return (
         <div className="h-full w-full flex overflow-hidden" style={{ background: '#fff6e5' }}>
-            {/* Slim icon rail */}
-            <div className="w-[60px] shrink-0 flex flex-col items-center py-3 gap-1 relative" style={{ background: '#4d0d0d' }}>
-                <div className="absolute left-0 top-0 bottom-0 w-[4px] kaushal-ethnic-edge" />
-                <button className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ color: '#f0d9b5', border: '1px solid rgba(240,217,181,0.25)' }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
-                </button>
-                {RAIL.map((r) => (
-                    <button
-                        key={r.id}
-                        title={r.label}
-                        onClick={() => railNav(r.id)}
-                        className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
-                        style={{
-                            background: r.id === 'home' ? '#f7e8c9' : 'transparent',
-                            color: r.id === 'home' ? '#4d0d0d' : '#e8a83e',
-                        }}
-                    >
-                        {r.icon}
-                    </button>
-                ))}
-                <button
-                    className="mt-auto w-10 h-10 rounded-xl flex items-center justify-center"
-                    style={{ color: '#a0613c', border: '1px solid rgba(240,217,181,0.2)' }}
-                    onClick={() => goHome('home')}
-                    title="Back"
-                >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 6l6 6-6 6" /></svg>
-                </button>
-            </div>
-
+            <Sidebar activeNav={activeNav} onNav={sidebarNav} />
             {/* Center: banner + videos + controls */}
             <div className="flex-1 flex flex-col min-w-0 relative kaushal-center-wrap">
                 {/* Top banner */}
@@ -258,6 +212,7 @@ export default function CounsellingCall({ onNav }) {
                 </div>
             </div>
 
+
             {/* Right chat column */}
             <div className="w-[320px] shrink-0 h-full hidden md:flex flex-col p-3 pl-0">
                 <div className="flex-1 flex flex-col min-h-0 rounded-2xl bg-white shadow-lg overflow-hidden" style={{ border: '1px solid #efdfc2' }}>
@@ -314,3 +269,4 @@ export default function CounsellingCall({ onNav }) {
         </div>
     );
 }
+

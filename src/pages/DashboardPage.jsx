@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import useAppStore from '../stores/appStore';
 import Sidebar from '../components/ui/Sidebar';
+import ErrorBoundary from '../components/ui/ErrorBoundary';
 import ChatPanel from '../components/chat/ChatPanel';
 import MedhaAvatar from '../components/avatar/MedhaAvatar';
 import CounsellingCall from '../components/interview/CounsellingCall';
@@ -15,6 +16,7 @@ export default function DashboardPage() {
 
     const [activeNav, setActiveNav] = useState('home');
     const [isCallMode, setIsCallMode] = useState(false);
+    const lang = useAppStore((s) => s.lang);
 
     useEffect(() => { fetchSessions(); }, []);
     useEffect(() => {
@@ -26,7 +28,9 @@ export default function DashboardPage() {
         <div className="h-full w-full flex overflow-hidden" style={{ background: '#fff6e5', color: '#4d0d0d' }}>
             {isInterviewMode ? (
                 <div className="flex-1 flex min-w-0 h-full">
-                    <CounsellingCall onNav={setActiveNav} />
+                    <ErrorBoundary name="family counselling room">
+                        <CounsellingCall onNav={setActiveNav} activeNav={activeNav} />
+                    </ErrorBoundary>
                 </div>
             ) : (
             <>
@@ -37,6 +41,7 @@ export default function DashboardPage() {
                 <div className="absolute bottom-0 left-0 right-0 h-[14px] kaushal-bottom-strip z-20" />
 
                 <div className="flex-1 flex flex-col min-w-0 relative z-10">
+                    <ErrorBoundary name="counselling chat">
                     {isVisualizeMode ? (
                         <div className="flex-1 flex flex-col p-5 gap-3 overflow-hidden">
                             <div className="flex items-center justify-between max-w-[1020px] w-full mx-auto">
@@ -52,6 +57,7 @@ export default function DashboardPage() {
                             <ChatPanel hideHero={false} isCallMode={isCallMode} setIsCallMode={setIsCallMode} />
                         </div>
                     )}
+                    </ErrorBoundary>
                 </div>
             </div>
 
@@ -78,7 +84,7 @@ export default function DashboardPage() {
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4l1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
                         </button>
                         <button onClick={() => useAppStore.getState().setLang(useAppStore.getState().lang === 'hi' ? 'en' : 'hi')} className="flex items-center gap-1 px-3.5 py-2 rounded-full bg-white/90 backdrop-blur text-[12px] font-bold shadow-sm" style={{ border: '1px solid #d9a679', color: '#4d0d0d' }}>
-                            {useAppStore((s) => s.lang) === 'hi' ? 'HI' : 'EN'}
+                            {lang === 'hi' ? 'HI' : 'EN'}
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m6 9 6 6 6-6"/></svg>
                         </button>
                     </div>
@@ -92,7 +98,7 @@ export default function DashboardPage() {
                         </div>
                         <button onClick={() => useAppStore.getState().setLang(useAppStore.getState().lang === 'hi' ? 'en' : 'hi')} className="px-3 py-2 rounded-[10px] text-[12px] font-semibold bg-white flex items-center gap-1.5" style={{ border: '1px solid #4d0d0d', color: '#4d0d0d' }}>
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/></svg>
-                            {useAppStore((s) => s.lang) === 'hi' ? 'हिंदी' : 'EN / HI'}
+                            {lang === 'hi' ? 'हिंदी' : 'EN / HI'}
                         </button>
                     </div>
                 </div>

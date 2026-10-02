@@ -260,15 +260,15 @@ function renderUserMessageContent(content) {
 
         return (
             <div className="space-y-2">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-900 font-semibold text-xs">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/25 text-[#ffe9c9] font-semibold text-xs">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
                         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
                     </svg>
                     <span>Theory Request {topic ? `• ${topic}` : ''}</span>
-                    <span className="text-[10px] text-zinc-500 font-normal ml-0.5">(Model code attached to AI)</span>
+                    <span className="text-[10px] text-[#e8c9a8] font-normal ml-0.5">(Model code attached to AI)</span>
                 </div>
-                <p className="text-sm leading-relaxed whitespace-pre-wrap text-zinc-900 font-medium">
+                <p className="text-sm leading-relaxed whitespace-pre-wrap text-[#fdf3e0] font-medium">
                     {cleanedText}
                 </p>
             </div>
@@ -281,8 +281,8 @@ function renderUserMessageContent(content) {
         if (withoutCode) {
             return (
                 <div className="space-y-1.5">
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap text-zinc-900">{withoutCode}</p>
-                    <div className="inline-flex items-center gap-1 text-[11px] text-zinc-500 bg-zinc-200/70 px-2 py-0.5 rounded-md font-mono">
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap text-[#fdf3e0]">{withoutCode}</p>
+                    <div className="inline-flex items-center gap-1 text-[11px] text-[#e8c9a8] bg-white/15 px-2 py-0.5 rounded-md font-mono">
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
                         <span>[ Attached code hidden from chat ]</span>
                     </div>
@@ -291,7 +291,7 @@ function renderUserMessageContent(content) {
         }
     }
 
-    return <p className="text-sm leading-relaxed whitespace-pre-wrap text-zinc-900">{content}</p>;
+    return <p className="text-sm leading-relaxed whitespace-pre-wrap text-[#fdf3e0]">{content}</p>;
 }
 
 export default function ChatMessage({ message, isTyping }) {

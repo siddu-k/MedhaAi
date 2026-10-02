@@ -566,14 +566,15 @@ const useAppStore = create((set, get) => ({
         set({ messages });
     },
 
-    saveMessage: (sessionId, role, content, imageUrl = null) => {
+    saveMessage: (sessionId, role, content, imageUrl = null, extra = {}) => {
         const newMessage = {
             id: crypto.randomUUID(),
             session_id: sessionId,
             role,
             content,
             image_url: imageUrl,
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            ...extra,
         };
         get().addMessage(newMessage);
         return newMessage;

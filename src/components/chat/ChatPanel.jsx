@@ -121,7 +121,7 @@ export default function ChatPanel({ hideHero = false, isCallMode = false, setIsC
         return () => { clearTimeout(t); stopSTT(); setIsListening(false); };
     }, [callMode, isAiTyping, isSpeaking, isListening, retry]);
 
-    const handleSend = async (text = input) => {
+    const handleSend = async (text = input, opts = {}) => {
         const store = useAppStore.getState();
         if (store.isProcessing) return;
         const trimmed = typeof text === 'string' ? text.trim() : '';
