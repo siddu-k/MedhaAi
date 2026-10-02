@@ -39,6 +39,11 @@ export default function Sidebar({ activeNav = 'home', onNav = null }) {
     const handleNav = (id) => {
         if (onNav) onNav(id);
         setCurrentPage('dashboard');
+        if (id === 'family') {
+            useAppStore.getState().startInterview('Family career counselling — learner with parents');
+            if (window.innerWidth < 1024) toggleSidebar();
+            return;
+        }
         const prompts = {
             explore: 'Explore vocational careers suitable for me based on my interests',
             compare: 'Compare Electrician vs Fitter: skills, earnings and jobs',

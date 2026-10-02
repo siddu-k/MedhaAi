@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import useAppStore from '../stores/appStore';
 import Sidebar from '../components/ui/Sidebar';
 import ChatPanel from '../components/chat/ChatPanel';
-import AvatarScene from '../components/avatar/AvatarScene';
+import Medha2DAvatar from '../components/avatar/Medha2DAvatar';
+import CounsellingCall from '../components/interview/CounsellingCall';
 import MermaidBoard from '../components/visualize/MermaidBoard';
 
 export default function DashboardPage() {
@@ -23,6 +24,12 @@ export default function DashboardPage() {
 
     return (
         <div className="h-full w-full flex overflow-hidden" style={{ background: '#fff6e5', color: '#4d0d0d' }}>
+            {isInterviewMode ? (
+                <div className="flex-1 flex min-w-0 h-full">
+                    <CounsellingCall onNav={setActiveNav} />
+                </div>
+            ) : (
+            <>
             <Sidebar activeNav={activeNav} onNav={setActiveNav} />
 
             {/* Center */}
@@ -40,14 +47,6 @@ export default function DashboardPage() {
                                 <MermaidBoard />
                             </div>
                         </div>
-                    ) : isInterviewMode ? (
-                        <div className="flex-1 flex flex-col overflow-hidden">
-                            <div className="flex items-center justify-between px-8 py-2 max-w-[1020px] w-full mx-auto">
-                                <span className="text-[12px] font-bold uppercase tracking-widest">Family Counselling Session</span>
-                                <button onClick={exitInterview} className="px-5 py-2 text-[12px] font-bold rounded-xl" style={{ background: '#4d0d0d', color: '#fff' }}>End Session</button>
-                            </div>
-                            <div className="flex-1 overflow-hidden"><ChatPanel hideHero isCallMode={isCallMode} setIsCallMode={setIsCallMode} /></div>
-                        </div>
                     ) : (
                         <div className="flex-1 flex min-w-0 overflow-hidden">
                             <ChatPanel hideHero={false} isCallMode={isCallMode} setIsCallMode={setIsCallMode} />
@@ -56,11 +55,23 @@ export default function DashboardPage() {
                 </div>
             </div>
 
-            {/* Right — Medha 2D on mandala backdrop */}
-            <div className="hidden lg:flex flex-col w-[308px] shrink-0 h-full relative kaushal-right">
+            {/* Right — mandala backdrop, no 3D avatar */}
+            <div className="hidden lg:flex flex-col w-[420px] shrink-0 h-full relative kaushal-right">
                 <div className="absolute top-0 left-0 right-0 h-[110px] pointer-events-none kaushal-hangings" />
-                <div className="flex-1 relative min-h-0 mx-2">
-                    <AvatarScene />
+                <div
+                    className="flex-1 relative min-h-0 mx-2 rounded-xl overflow-hidden"
+                    style={{
+                        backgroundImage: 'url(/art/mandala-backdrop.png)',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundColor: '#fcefd6',
+                    }}
+                >
+                    {/* 2D Medha avatar — expressions swap per word while speaking */}
+                    <div className="absolute inset-0 flex items-end justify-center">
+                        <Medha2DAvatar className="pointer-events-none select-none" />
+                    </div>
                     {/* Floating controls directly on mandala — no container bg */}
                     <div className="absolute top-2 right-2 flex items-center gap-2 bg-transparent p-0 m-0" style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}>
                         <button className="w-9 h-9 rounded-full bg-white/90 backdrop-blur flex items-center justify-center shadow-sm" style={{ border: '1px solid #e8d5b5', color: '#8a5a2a' }}>
@@ -87,6 +98,8 @@ export default function DashboardPage() {
                 </div>
                 <div className="h-[14px] kaushal-bottom-strip" />
             </div>
+            </>
+            )}
         </div>
     );
 }

@@ -25,19 +25,18 @@ const QUICK = ['Best ITI trade for me?', 'Electrician vs Fitter?', 'Jobs in Andh
 
 function HeroArt() {
     return (
-        <div className="relative w-full flex flex-col items-center pt-4 pb-1 mt-2">
+        <div className="relative w-full flex flex-col items-center pt-2 pb-1 shrink-0">
             <img
                 src="/art/hero-medha.png"
                 alt="Namaste Medha — Careers in Motion"
-                className="w-full max-w-[1020px] h-[210px] object-cover select-none pointer-events-none rounded-xl"
-                style={{ objectPosition: 'center 30%' }}
+                className="w-full max-w-[1020px] h-auto object-contain select-none pointer-events-none rounded-xl"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
             />
         </div>
     );
 }
 
-export default function ChatPanel({ hideHero = false, isCallMode = false, setIsCallMode = null }) {
+export default function ChatPanel({ hideHero = false, isCallMode = false, setIsCallMode = null, compact = false }) {
     const {
         messages, addMessage, updateLastMessage,
         currentSession, isAiTyping, setIsAiTyping,
@@ -133,8 +132,19 @@ export default function ChatPanel({ hideHero = false, isCallMode = false, setIsC
                 if (autoSpeak) {
                     let w = partial.substring(spoken);
                     const re = /[^.?!]+[.?!](?:\s+|$)/g; let m;
+                    let flushed = false;
                     while ((m = re.exec(w)) !== null) {
-                        if (m[0].trim()) { enqueueSpeech(m[0]); spoken += (m.index + m[0].length); w = partial.substring(spoken); re.lastIndex = 0; }
+                        if (m[0].trim()) { enqueueSpeech(m[0]); spoken += (m.index + m[0].length); w = partial.substring(spoken); re.lastIndex = 0; flushed = true; }
+                    }
+                    // No full sentence yet but a clause is ready — speak it now
+                    // instead of waiting for [.?!] so 1-on-1 voice starts instantly.
+                    if (!flushed && w.length > 60) {
+                        const ci = Math.max(w.lastIndexOf(','), w.lastIndexOf(';'), w.lastIndexOf(':'), w.lastIndexOf('—'));
+                        if (ci > 30) {
+                            const clause = w.slice(0, ci + 1);
+                            enqueueSpeech(clause);
+                            spoken += clause.length;
+                        }
                     }
                 }
             }, abortRef.current.signal, selectedModel,
@@ -177,17 +187,17 @@ export default function ChatPanel({ hideHero = false, isCallMode = false, setIsC
 
     return (
         <div className="flex flex-col h-full w-full kaushal-chat">
-            <div ref={chatContainerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-6 py-4 kaushal-scroll">
+            <div ref={chatContainerRef} onScroll={handleScroll} className={`flex-1 overflow-y-auto kaushal-scroll ${compact ? 'px-3 py-3' : 'px-6 py-4'}`}>
                 {showHero ? (
                     <div className="max-w-[1020px] mx-auto">
                         <HeroArt />
-                        <div className="grid grid-cols-4 gap-3 mt-3">
+                        <div className="grid grid-cols-4 gap-2.5 mt-2.5">
                             {HOME_CARDS.map((c) => (
-                                <button key={c.id} onClick={() => cardSend(c.id)} className="text-left rounded-[12px] p-3 bg-[#fffdf5] flex flex-col gap-1.5 transition-all hover:shadow-[0_8px_24px_rgba(120,60,20,0.12)] hover:-translate-y-[1px] min-h-[148px]" style={{ border: '1px solid #efdfc2', boxShadow: '0 2px 12px rgba(120,60,20,0.06)' }}>
-                                    <div className="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center shrink-0" style={{ background: c.bg }}>{c.icon}</div>
-                                    <p className="text-[12.5px] font-semibold leading-snug tracking-tight" style={{ color: '#4d0d0d', fontFamily: 'Inter, system-ui, sans-serif' }}>{c.title}</p>
-                                    <p className="text-[10.5px] leading-[1.45] whitespace-pre-line flex-1 font-normal" style={{ color: '#6b6a6a', fontFamily: 'Inter, system-ui, sans-serif' }}>{c.desc}</p>
-                                    <span className="w-[22px] h-[22px] rounded-full flex items-center justify-center self-end" style={{ border: '1px solid #d9a679', color: '#8a5a2a', background: '#fff' }}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 6l6 6-6 6"/></svg></span>
+                                <button key={c.id} onClick={() => cardSend(c.id)} className="text-left rounded-[10px] p-2.5 bg-[#fffdf5] flex flex-col gap-1 transition-all hover:shadow-[0_8px_24px_rgba(120,60,20,0.12)] hover:-translate-y-[1px] min-h-[118px]" style={{ border: '1px solid #efdfc2', boxShadow: '0 2px 12px rgba(120,60,20,0.06)' }}>
+                                    <div className="w-[32px] h-[32px] rounded-[8px] flex items-center justify-center shrink-0" style={{ background: c.bg }}>{c.icon}</div>
+                                    <p className="text-[12px] font-semibold leading-snug tracking-tight" style={{ color: '#4d0d0d', fontFamily: 'Inter, system-ui, sans-serif' }}>{c.title}</p>
+                                    <p className="text-[10px] leading-[1.4] whitespace-pre-line flex-1 font-normal" style={{ color: '#6b6a6a', fontFamily: 'Inter, system-ui, sans-serif' }}>{c.desc}</p>
+                                    <span className="w-[20px] h-[20px] rounded-full flex items-center justify-center self-end" style={{ border: '1px solid #d9a679', color: '#8a5a2a', background: '#fff' }}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 6l6 6-6 6"/></svg></span>
                                 </button>
                             ))}
                         </div>
@@ -204,7 +214,7 @@ export default function ChatPanel({ hideHero = false, isCallMode = false, setIsC
                         </div>
                     </div>
                 ) : (
-                    <div className="max-w-[1020px] mx-auto space-y-5 pt-2">
+                    <div className={`${compact ? 'max-w-none' : 'max-w-[1020px]'} mx-auto space-y-5 pt-2`}>
                         {messages.map((msg, i) => (
                             <ChatMessage key={i} message={msg} isTyping={isAiTyping && i === messages.length - 1 && msg.role === 'assistant'} />
                         ))}
@@ -225,8 +235,8 @@ export default function ChatPanel({ hideHero = false, isCallMode = false, setIsC
                     </div>
                 </div>
             )}
-            <div className="px-6 pb-5 pt-1">
-                <div className="max-w-[800px] mx-auto rounded-[16px] bg-[#fffdf5] flex items-center gap-1.5 p-2 pl-3" style={{ border: '1px solid #e8d5b5', boxShadow: '0 6px 24px rgba(120,60,20,0.10)' }}>
+            <div className={`${compact ? 'px-3 pb-3' : 'px-6 pb-5'} pt-1`}>
+                <div className={`${compact ? 'max-w-none' : 'max-w-[800px]'} mx-auto rounded-[16px] bg-[#fffdf5] flex items-center gap-1.5 p-2 pl-3`} style={{ border: '1px solid #e8d5b5', boxShadow: '0 6px 24px rgba(120,60,20,0.10)' }}>
                     <span style={{ color: '#8a5a2a' }}><ImageUpload onImageSelect={onImg} /></span>
                     <input ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={onKey} placeholder="Ask me anything about careers, trades, skills, jobs..." className="flex-1 mx-1 px-4 py-2.5 text-[13px] outline-none rounded-[10px]" style={{ background: '#f8efdc', color: '#4d0d0d' }} />
                     <VoiceControls onResult={(t) => t && setInput(t)} />
