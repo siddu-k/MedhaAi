@@ -4,6 +4,10 @@ import ChatMessage from './ChatMessage';
 import ImageUpload from './ImageUpload';
 import VoiceControls from '../voice/VoiceControls';
 import { streamChat, fileToBase64, extractMermaidDiagram, listLocalModels } from '../../services/aiService';
+import { counsellingPromptWith } from '../../services/geminiService';
+import { getOutcomeContext, detectObjection, matchDistrict } from '../../services/outcomeService';
+import { logObjection, logSession, getDistrict, setDistrict } from '../../services/engagementLog';
+import EscalationModal from '../escalation/EscalationModal';
 import { speak, stopSpeaking, enqueueSpeech, startListening as startSTT, stopListening as stopSTT } from '../../services/voiceService';
 
 const HOME_CARDS = [
@@ -55,6 +59,9 @@ export default function ChatPanel({ hideHero = false, isCallMode = false, setIsC
     const [localCall, setLocalCall] = useState(false);
     const callMode = setIsCallMode ? isCallMode : localCall;
     const setCallMode = setIsCallMode || setLocalCall;
+    const [retry, setRetry] = useState(0);
+    const sentRef = useRef(null);
+    const [showEscalation, setShowEscalation] = useState(false);
 
     const chatContainerRef = useRef(null);
     const abortRef = useRef(null);
@@ -82,18 +89,34 @@ export default function ChatPanel({ hideHero = false, isCallMode = false, setIsC
 
     useEffect(() => {
         if (!callMode) { if (isListening) { stopSTT(); setIsListening(false); } return; }
-        if (!isAiTyping && !isSpeaking && !isListening) {
-            const t = setTimeout(() => {
-                setIsListening(true);
-                startSTT(
-                    (tx) => setInput(tx),
-                    (final) => { setIsListening(false); if (final?.trim()) { handleSend(final); setInput(''); } },
-                    () => { setIsListening(false); }
-                );
-            }, 700);
-            return () => { clearTimeout(t); stopSTT(); setIsListening(false); };
-        }
-    }, [callMode, isAiTyping, isSpeaking]);
+        if (isAiTyping || isSpeaking || isListening) return;
+        const t = setTimeout(() => {
+            setIsListening(true);
+            startSTT(
+                (tx) => setInput(tx),
+                (final) => {
+                    setIsListening(false);
+                    const text = (final || '').trim();
+                    if (text) {
+                        // guard: ignore echoes of what we just sent (stop() triggers onend)
+                        const last = sentRef.current;
+                        const now = Date.now();
+                        if (!last || last.text !== text || now - last.at > 2500) {
+                            sentRef.current = { text, at: now };
+                            handleSend(text);
+                            setInput('');
+                        } else {
+                            setRetry((r) => r + 1);
+                        }
+                    } else {
+                        setRetry((r) => r + 1); // silence: re-open the mic
+                    }
+                },
+                () => { setIsListening(false); setRetry((r) => r + 1); } // error: recover
+            );
+        }, 700);
+        return () => { clearTimeout(t); stopSTT(); setIsListening(false); };
+    }, [callMode, isAiTyping, isSpeaking, isListening, retry]);
 
     const handleSend = async (text = input) => {
         const store = useAppStore.getState();
@@ -113,6 +136,14 @@ export default function ChatPanel({ hideHero = false, isCallMode = false, setIsC
                 store.setSessions(store.sessions.map(s => s.id === activeSession.id ? { ...s, title: nt } : s));
             }
             await saveMessage(activeSession.id, 'user', trimmed, curPrev);
+            // Track resistance signals for the admin dashboard + remember district
+            try {
+                const foundDistrict = matchDistrict(trimmed);
+                if (foundDistrict) setDistrict(foundDistrict);
+                logSession(activeSession.id, foundDistrict || getDistrict());
+                const objection = detectObjection(trimmed);
+                if (objection) logObjection(objection, activeSession.id, foundDistrict || getDistrict());
+            } catch (e) {}
             const hist = messages.map(m => ({ role: m.role, content: m.content }));
             hist.push({ role: 'user', content: trimmed });
             if (curImg) { try { const b = await fileToBase64(curImg); hist[hist.length - 1].images = [b]; } catch (e) {} }
@@ -148,7 +179,13 @@ export default function ChatPanel({ hideHero = false, isCallMode = false, setIsC
                     }
                 }
             }, abortRef.current.signal, selectedModel,
-                { isVisualizeMode: store.isVisualizeMode, visualDimension: '2d', activeConcept: store.activeConcept });
+                {
+                    isInterviewMode: store.isInterviewMode,
+                    jobDescription: store.activeJobDescription,
+                    isVisualizeMode: store.isVisualizeMode, visualDimension: '2d', activeConcept: store.activeConcept,
+                    // Verified outcome data + language ride along as the system prompt
+                    systemPrompt: counsellingPromptWith(getOutcomeContext(trimmed), store.lang || 'en'),
+                });
             if (reqId === currentRequestIdRef.current) {
                 const fd = extractMermaidDiagram(full);
                 if (fd) store.setBoardDiagram(fd);
@@ -242,7 +279,13 @@ export default function ChatPanel({ hideHero = false, isCallMode = false, setIsC
                     <VoiceControls onResult={(t) => t && setInput(t)} />
                     <button onClick={() => handleSend()} disabled={!input.trim() && !attachedImage} className="w-[42px] h-[42px] rounded-[10px] flex items-center justify-center text-white disabled:opacity-30" style={{ background: '#7a1f1f' }}><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M3 11l18-7-7 18-2.5-7.5L3 11z"/></svg></button>
                 </div>
+                {!compact && (
+                    <div className="max-w-[800px] mx-auto mt-2 text-center">
+                        <button onClick={() => setShowEscalation(true)} className="text-[12px] font-semibold underline underline-offset-2" style={{ color: '#7a1f1f' }}>Need a human counsellor? Request a callback</button>
+                    </div>
+                )}
             </div>
+            {showEscalation && <EscalationModal onClose={() => setShowEscalation(false)} />}
         </div>
     );
 }

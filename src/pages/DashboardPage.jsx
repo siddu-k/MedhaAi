@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import useAppStore from '../stores/appStore';
 import Sidebar from '../components/ui/Sidebar';
 import ChatPanel from '../components/chat/ChatPanel';
-import Medha2DAvatar from '../components/avatar/Medha2DAvatar';
+import MedhaAvatar from '../components/avatar/MedhaAvatar';
 import CounsellingCall from '../components/interview/CounsellingCall';
 import MermaidBoard from '../components/visualize/MermaidBoard';
 
@@ -68,17 +68,17 @@ export default function DashboardPage() {
                         backgroundColor: '#fcefd6',
                     }}
                 >
-                    {/* 2D Medha avatar — expressions swap per word while speaking */}
-                    <div className="absolute inset-0 flex items-end justify-center">
-                        <Medha2DAvatar className="pointer-events-none select-none" />
+                    {/* Medha stage — full-body viseme frames */}
+                    <div className="absolute inset-0">
+                        <MedhaAvatar className="pointer-events-none select-none" />
                     </div>
                     {/* Floating controls directly on mandala — no container bg */}
                     <div className="absolute top-2 right-2 flex items-center gap-2 bg-transparent p-0 m-0" style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}>
                         <button className="w-9 h-9 rounded-full bg-white/90 backdrop-blur flex items-center justify-center shadow-sm" style={{ border: '1px solid #e8d5b5', color: '#8a5a2a' }}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4l1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
                         </button>
-                        <button className="flex items-center gap-1 px-3.5 py-2 rounded-full bg-white/90 backdrop-blur text-[12px] font-bold shadow-sm" style={{ border: '1px solid #d9a679', color: '#4d0d0d' }}>
-                            EN
+                        <button onClick={() => useAppStore.getState().setLang(useAppStore.getState().lang === 'hi' ? 'en' : 'hi')} className="flex items-center gap-1 px-3.5 py-2 rounded-full bg-white/90 backdrop-blur text-[12px] font-bold shadow-sm" style={{ border: '1px solid #d9a679', color: '#4d0d0d' }}>
+                            {useAppStore((s) => s.lang) === 'hi' ? 'HI' : 'EN'}
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m6 9 6 6 6-6"/></svg>
                         </button>
                     </div>
@@ -88,11 +88,11 @@ export default function DashboardPage() {
                         <div className="flex-1 leading-tight">
                             <p className="text-[14px] font-bold flex items-center gap-1.5" style={{ color: '#4d0d0d', fontFamily: 'Georgia, serif' }}><span className="w-2 h-2 rounded-full inline-block" style={{ background: '#4caf7d' }} /> Medha AI</p>
                             <p className="text-[9.5px] font-semibold tracking-[0.08em] mt-0.5" style={{ color: '#8a6a4a' }}>AI CAREER COUNSELLOR</p>
-                            <p className="text-[10px] font-bold mt-1 flex items-center gap-1" style={{ color: '#4a7a5b' }}><span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: '#4caf7d' }} /> 3D ASSISTANT ACTIVE</p>
+                            <p className="text-[10px] font-bold mt-1 flex items-center gap-1" style={{ color: '#4a7a5b' }}><span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: '#4caf7d' }} /> VOICE COUNSELLOR ACTIVE</p>
                         </div>
-                        <button className="px-3 py-2 rounded-[10px] text-[12px] font-semibold bg-white flex items-center gap-1.5" style={{ border: '1px solid #4d0d0d', color: '#4d0d0d' }}>
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33h.01a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51h.01a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v.01a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-                            Customize
+                        <button onClick={() => useAppStore.getState().setLang(useAppStore.getState().lang === 'hi' ? 'en' : 'hi')} className="px-3 py-2 rounded-[10px] text-[12px] font-semibold bg-white flex items-center gap-1.5" style={{ border: '1px solid #4d0d0d', color: '#4d0d0d' }}>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/></svg>
+                            {useAppStore((s) => s.lang) === 'hi' ? 'हिंदी' : 'EN / HI'}
                         </button>
                     </div>
                 </div>

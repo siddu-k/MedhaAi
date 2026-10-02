@@ -43,7 +43,7 @@ function visemeForChar(ch) {
     }
 }
 
-// Called ~70ms by Medha2DAvatar via lipsyncManager fields.
+// Called ~70ms by the avatar renderer via lipsyncManager fields.
 lipsyncManager.processAudio = function () {
     if (!isSyntheticSpeaking || !audioLive) {
         this.features = { volume: 0, energy: 0 };

@@ -1,0 +1,120 @@
+{
+  "meta": {
+    "note": "Indicative sample dataset for demo. Replace with verified PMKVY / ITI / NAPS / state placement-cell figures before production. All figures are ranges, not guarantees.",
+    "currency": "INR per month",
+    "last_reviewed": "2026-09-01"
+  },
+  "districts": ["Anantapur", "Chittoor", "Guntur", "Krishna", "Kurnool", "Nellore", "Prakasam", "Visakhapatnam", "Vizianagaram", "East Godavari", "West Godavari", "Srikakulam", "Kadapa"],
+  "trades": [
+    {
+      "id": "electrician", "name": "Electrician", "hindi": "बिजली मिस्त्री",
+      "keywords": ["electrician", "bijli", "बिजली", "wireman", "वायरमैन", "electrical"],
+      "nsqf": 4, "duration_months": 24, "typical_fee_inr": 0,
+      "earnings_min": 14000, "earnings_max": 22000,
+      "placement_rate_pct": 68,
+      "roles": ["Maintenance Electrician", "Lineman Helper (APEPDCL contractors)", "Solar Panel Installer", "Lift Technician"],
+      "progression": ["NSQF L5 Supervisor", "NAPS apprenticeship (stipend ~60% of minimum wage)", "Wireman licence", "Diploma (lateral entry)"],
+      "safety_note": "Licensed supervised work; insist on safety gear and ESI/PF-compliant employers.",
+      "source": "ITI placement cells + NAPS stipend norms (indicative)"
+    },
+    {
+      "id": "fitter", "name": "Fitter", "hindi": "फिटर",
+      "keywords": ["fitter", "फिटर", "machinist", "turner"],
+      "nsqf": 4, "duration_months": 24, "typical_fee_inr": 0,
+      "earnings_min": 15000, "earnings_max": 24000,
+      "placement_rate_pct": 71,
+      "roles": ["Fitter (manufacturing)", "Maintenance Mechanic", "CNC Operator Trainee", "Vizag steel/port ancillary units"],
+      "progression": ["NSQF L5 Technician", "CNC programming short course", "Diploma (lateral entry)"],
+      "safety_note": "Factory roles covered under Factories Act; check ESI/PF registration.",
+      "source": "DGT trade outcome summaries (indicative)"
+    },
+    {
+      "id": "welder", "name": "Welder", "hindi": "वेल्डर",
+      "keywords": ["welder", "welding", "वेल्डर", "fabrication"],
+      "nsqf": 3, "duration_months": 12, "typical_fee_inr": 0,
+      "earnings_min": 16000, "earnings_max": 28000,
+      "placement_rate_pct": 66,
+      "roles": ["Structural Welder", "Pipeline Welder Helper", "Gulf migration pathway (certified welders)"],
+      "progression": ["NSQF L4 Advanced Welder", "ASME 6G certification", "QA/QC Welding Inspector course"],
+      "safety_note": "Eye/respiratory protection is non-negotiable; certified roles pay a premium.",
+      "source": "Sector Skill Council placement reports (indicative)"
+    },
+    {
+      "id": "plumber", "name": "Plumber", "hindi": "प्लंबर",
+      "keywords": ["plumber", "plumbing", "प्लंबर", "pipe"],
+      "nsqf": 3, "duration_months": 12, "typical_fee_inr": 0,
+      "earnings_min": 13000, "earnings_max": 25000,
+      "placement_rate_pct": 62,
+      "roles": ["Building Maintenance Plumber", "Self-employed service work", "Water-supply board contractors"],
+      "progression": ["NSQF L4 Supervisor", "Own service business (Mudra loan route)", "Facilities-management firms"],
+      "safety_note": "Mostly day-shift local work; easy to stay near home.",
+      "source": "State placement cells (indicative)"
+    },
+    {
+      "id": "healthcare", "name": "Healthcare Assistant / GDA", "hindi": "स्वास्थ्य सहायक",
+      "keywords": ["health", "nursing", "gda", "healthcare", "hospital", "स्वास्थ्य", "nurse", "आया", "caretaker"],
+      "nsqf": 4, "duration_months": 12, "typical_fee_inr": 0,
+      "earnings_min": 12000, "earnings_max": 18000,
+      "placement_rate_pct": 74,
+      "roles": ["General Duty Assistant (hospitals)", "Home-care attendant", "Lab sample collection assistant"],
+      "progression": ["NSQF L5 Senior GDA", "ANM/GNM nursing courses (with 12th)", "Phlebotomy technician"],
+      "safety_note": "High demand for daughters: reputed hospitals provide hostels, fixed shifts, background-verified wards.",
+      "source": "Healthcare SSC reports (indicative)"
+    },
+    {
+      "id": "sewing", "name": "Tailoring / Apparel", "hindi": "सिलाई",
+      "keywords": ["tailor", "tailoring", "sewing", "stitching", "सिलाई", "garment", "apparel", "boutique"],
+      "nsqf": 3, "duration_months": 12, "typical_fee_inr": 0,
+      "earnings_min": 9000, "earnings_max": 18000,
+      "placement_rate_pct": 58,
+      "roles": ["Garment factory operator", "Boutique tailor (self-employed)", "Work-from-home stitching units"],
+      "progression": ["NSQF L4 Master cutter", "Fashion design short course", "Own boutique (Mudra route)"],
+      "safety_note": "Home-based options exist; verify piece-rate terms before joining units.",
+      "source": "Apparel SSC reports (indicative)"
+    },
+    {
+      "id": "solar", "name": "Solar PV Installer", "hindi": "सोलर तकनीशियन",
+      "keywords": ["solar", "सोलर", "photovoltaic", "pv installer", "renewable"],
+      "nsqf": 4, "duration_months": 6, "typical_fee_inr": 0,
+      "earnings_min": 15000, "earnings_max": 25000,
+      "placement_rate_pct": 64,
+      "roles": ["Rooftop solar installer", "Solar O&M technician", "DISCOM empanelled vendors"],
+      "progression": ["NSQF L5 Solar lead", "Entrepreneur (MNRE vendor registration)", "Electrical supervisor licence"],
+      "safety_note": "Work-at-height training included; certified installers are in short supply.",
+      "source": "Skill Council for Green Jobs (indicative)"
+    },
+    {
+      "id": "beauty", "name": "Beauty & Wellness", "hindi": "ब्यूटी पार्लर",
+      "keywords": ["beauty", "parlour", "parlor", "salon", "ब्यूटी", "makeup", "hairdresser"],
+      "nsqf": 3, "duration_months": 12, "typical_fee_inr": 0,
+      "earnings_min": 10000, "earnings_max": 20000,
+      "placement_rate_pct": 60,
+      "roles": ["Salon therapist", "Bridal makeup assistant", "Own parlour (home-based start possible)"],
+      "progression": ["NSQF L4 Senior therapist", "Cosmetology diploma", "Franchise parlour roles"],
+      "safety_note": "Strong option for daughters staying near home; verify salon registration.",
+      "source": "Beauty & Wellness SSC (indicative)"
+    },
+    {
+      "id": "food", "name": "Food Processing", "hindi": "खाद्य प्रसंस्करण",
+      "keywords": ["food", "cooking", "catering", "bakery", "खाद्य", "pickle", "millet"],
+      "nsqf": 3, "duration_months": 12, "typical_fee_inr": 0,
+      "earnings_min": 11000, "earnings_max": 18000,
+      "placement_rate_pct": 57,
+      "roles": ["Food processing operator", "Catering assistant", "Millet/SHG value-addition units"],
+      "progression": ["NSQF L4 Supervisor", "FSSAI food safety supervisor", "SHG enterprise (AP rural livelihoods link)"],
+      "safety_note": "SHG-linked units let mothers and daughters work together locally.",
+      "source": "Food Industry SSC (indicative)"
+    },
+    {
+      "id": "computer", "name": "Computer Operator / DTP", "hindi": "कंप्यूटर ऑपरेटर",
+      "keywords": ["computer", "operator", "data entry", "dtp", "typing", "कंप्यूटर", "csc", "e-seva"],
+      "nsqf": 3, "duration_months": 6, "typical_fee_inr": 0,
+      "earnings_min": 10000, "earnings_max": 16000,
+      "placement_rate_pct": 55,
+      "roles": ["Data entry operator", "CSC / e-Seva centre staff", "Office assistant (computer)"],
+      "progression": ["NSQF L4", "Tally + GST assistant", "BCA via open schooling route"],
+      "safety_note": "Desk work; check salary slips and PF for private operators.",
+      "source": "State placement cells (indicative)"
+    }
+  ]
+}

@@ -18,16 +18,18 @@ export function isSTTSupported() {
     return typeof window !== 'undefined' && !!(window.SpeechRecognition || window.webkitSpeechRecognition);
 }
 
-export function startListening(onResult, onEnd, onError) {
+export function startListening(onResult, onEnd, onError, lang = null) {
     if (!isSTTSupported()) {
         onError?.('Speech recognition not supported in this browser');
         return null;
     }
+    const storeLang = (() => { try { return useAppStore.getState().lang || 'en'; } catch (e) { return 'en'; } })();
+    const targetLang = lang || (storeLang === 'hi' ? 'hi-IN' : 'en-US');
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognition = new SpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = true;
-    recognition.lang = 'en-US';
+    recognition.lang = targetLang;
     let finalTranscript = '';
     recognition.onresult = (event) => {
         let interim = '';
@@ -63,13 +65,25 @@ function voices() {
     try { return window.speechSynthesis?.getVoices() || []; } catch (e) { return []; }
 }
 
+let cachedVoiceKey = '';
+
+function storeLang() {
+    try { return useAppStore.getState().lang || 'en'; } catch (e) { return 'en'; }
+}
+
 function bestVoice() {
-    if (pickedVoice) return pickedVoice;
-    const vs = voices().filter((v) => v.lang?.startsWith('en'));
-    pickedVoice =
-        vs.find((v) => /Natural|Google UK English Female|Jenny|Aria/i.test(v.name) && /^en-(US|GB)$/.test(v.lang)) ||
-        vs.find((v) => v.lang === 'en-US') ||
-        vs[0] || null;
+    const wantHi = storeLang() === 'hi';
+    const key = wantHi ? 'hi' : 'en';
+    if (pickedVoice && cachedVoiceKey === key) return pickedVoice;
+    const all = voices();
+    const vs = all.filter((v) => v.lang?.startsWith(wantHi ? 'hi' : 'en'));
+    const pool = vs.length > 0 ? vs : all.filter((v) => v.lang?.startsWith('en'));
+    pickedVoice = wantHi
+        ? (pool.find((v) => /hindi|lekha|kalpana|hemant/i.test(v.name)) || pool.find((v) => v.lang === 'hi-IN') || pool[0] || null)
+        : (pool.find((v) => /Natural|Google UK English Female|Jenny|Aria/i.test(v.name) && /^en-(US|GB)$/.test(v.lang)) ||
+            pool.find((v) => v.lang === 'en-US') ||
+            pool[0] || null);
+    cachedVoiceKey = key;
     return pickedVoice;
 }
 
@@ -98,7 +112,7 @@ export function isTTSSupported() {
 }
 
 export function getSystemVoices() {
-    return voices().filter((v) => v.lang?.startsWith('en'));
+    return voices().filter((v) => v.lang?.startsWith('en') || v.lang?.startsWith('hi'));
 }
 
 function clean(text) {
@@ -136,6 +150,7 @@ function playNext() {
     if (queue.length === 0) {
         playing = false;
         stopSyntheticSpeech();
+        try { useAppStore.getState().setIsSpeaking(false); } catch (e) {}
         const cb = onEndCb;
         onEndCb = null;
         cb?.();
@@ -152,6 +167,7 @@ function playNext() {
     u.onstart = () => {
         setAudioLive(true);
         startSyntheticSpeech(text);
+        try { useAppStore.getState().setIsSpeaking(true); } catch (e) {}
     };
     u.onboundary = (e) => {
         if (e.name === 'word') {
@@ -200,6 +216,7 @@ export function stopSpeaking() {
     playing = false;
     setAudioLive(false);
     stopSyntheticSpeech();
+    try { useAppStore.getState().setIsSpeaking(false); } catch (e) {}
     try { window.speechSynthesis?.cancel(); } catch (e) {}
     const cb = onEndCb;
     onEndCb = null;

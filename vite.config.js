@@ -7,5 +7,12 @@ export default defineConfig({
   server: {
     port: 5173,
     open: true,
+    watch: {
+      // loose image drops + OneDrive-locked folders must never crash the watcher
+      ignored: ['**/mouthmot/**', '**/node_modules/**', '**/dist/**'],
+    },
+  },
+  build: {
+    chunkSizeWarningLimit: 2500,
   },
 });

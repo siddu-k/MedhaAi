@@ -2,6 +2,7 @@ import DashboardPage from './pages/DashboardPage';
 import LandingPage from './pages/LandingPage';
 import SettingsPage from './pages/SettingsPage';
 import DoubtPage from './pages/DoubtPage';
+import AdminDashboard from './pages/AdminDashboard';
 import useAppStore from './stores/appStore';
 
 export default function App() {
@@ -16,6 +17,8 @@ export default function App() {
             return <SettingsPage />;
         case 'doubt':
             return <DoubtPage />;
+        case 'admin':
+            return <AdminDashboard />;
         case 'dashboard':
         default:
             return <DashboardPage />;

@@ -22,6 +22,9 @@ const NAV = [
     { id: 'resources', label: 'Resources', icon: (
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19V5a2 2 0 012-2h13v16H6a2 2 0 00-2 2zm0 0a2 2 0 002 2h13"/></svg>
     )},
+    { id: 'admin', label: 'Admin Dashboard', icon: (
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3v18h18" /><path d="M7 15l4-5 3 3 5-7" /></svg>
+    )},
 ];
 
 export default function Sidebar({ activeNav = 'home', onNav = null }) {
@@ -38,6 +41,11 @@ export default function Sidebar({ activeNav = 'home', onNav = null }) {
 
     const handleNav = (id) => {
         if (onNav) onNav(id);
+        if (id === 'admin') {
+            setCurrentPage('admin');
+            if (window.innerWidth < 1024) toggleSidebar();
+            return;
+        }
         setCurrentPage('dashboard');
         if (id === 'family') {
             useAppStore.getState().startInterview('Family career counselling — learner with parents');
@@ -103,9 +111,9 @@ export default function Sidebar({ activeNav = 'home', onNav = null }) {
                             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#e8a83e" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33h.01a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51h.01a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v.01a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
                             Settings
                         </button>
-                        <button className="w-full flex items-center gap-3 px-3 py-[9px] rounded-[10px] text-[13.5px]" style={{ color: '#f0d9b5' }}>
+                        <button onClick={() => useAppStore.getState().setLang(useAppStore.getState().lang === 'hi' ? 'en' : 'hi')} className="w-full flex items-center gap-3 px-3 py-[9px] rounded-[10px] text-[13.5px]" style={{ color: '#f0d9b5' }}>
                             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#e8a83e" strokeWidth="2"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/></svg>
-                            Language <span className="ml-auto text-[12px] opacity-70">EN ›</span>
+                            Language <span className="ml-auto text-[12px] opacity-70">{useAppStore((s) => s.lang) === 'hi' ? 'HI ›' : 'EN ›'}</span>
                         </button>
                     </div>
                     <div className="flex items-center gap-2.5 px-2 py-2.5" style={{ borderTop: '1px solid rgba(240,217,181,0.2)' }}>

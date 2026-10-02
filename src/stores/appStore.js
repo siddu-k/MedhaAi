@@ -28,6 +28,11 @@ const useAppStore = create((set, get) => ({
         return stored || 'gemini-3.5-flash-lite';
     })(),
     aiProvider: loadStorage('tyloop_ai_provider', 'gemini'), // 'gemini' | 'local'
+    lang: loadStorage('medha_lang', 'en'), // 'en' | 'hi'
+    setLang: (lang) => {
+        set({ lang });
+        saveStorage('medha_lang', lang);
+    },
     geminiApiKey: loadStorage('tyloop_gemini_api_key', import.meta.env.VITE_GEMINI_API_KEY || ''),
     authLoading: false,
     isProcessing: false,

@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import useAppStore from '../../stores/appStore';
 import ChatPanel from '../chat/ChatPanel';
-import Medha2DAvatar from '../avatar/Medha2DAvatar';
+import MedhaAvatar from '../avatar/MedhaAvatar';
 import UserVideo from './UserVideo';
+import EscalationModal from '../escalation/EscalationModal';
 import { stopSpeaking } from '../../services/voiceService';
 
 const RAIL = [
@@ -51,29 +52,15 @@ export default function CounsellingCall({ onNav }) {
     const {
         exitInterview, setCurrentPage, setPendingUserPrompt,
         userName, messages, createSession, currentSession,
+        lang, setLang,
     } = useAppStore();
     const [tab, setTab] = useState('chat');
     const [muted, setMuted] = useState(false);
     const [camOn, setCamOn] = useState(true);
     const [captionsOn, setCaptionsOn] = useState(true);
-    const [recording, setRecording] = useState(false);
     const [moreOpen, setMoreOpen] = useState(false);
-    const [notes, setNotes] = useState('');
+    const [showEscalation, setShowEscalation] = useState(false);
     const [isCallMode, setIsCallMode] = useState(true);
-    const recRef = useRef(null);
-    const recChunks = useRef([]);
-    const recStream = useRef(null);
-
-    const sessionId = currentSession?.id;
-
-    useEffect(() => {
-        if (sessionId) setNotes(localStorage.getItem(`medha_notes_${sessionId}`) || '');
-    }, [sessionId]);
-
-    const saveNotes = (v) => {
-        setNotes(v);
-        if (sessionId) localStorage.setItem(`medha_notes_${sessionId}`, v);
-    };
 
     const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant' && m.content?.trim());
     const captionText = (lastAssistant?.content || '')
@@ -109,35 +96,6 @@ export default function CounsellingCall({ onNav }) {
         if (prompts[id]) setPendingUserPrompt({ prompt: prompts[id], autoSend: id !== 'home' });
     };
 
-    const toggleRecord = async () => {
-        if (recording) {
-            try { recRef.current?.stop(); } catch (e) {}
-            recStream.current?.getTracks().forEach((t) => t.stop());
-            setRecording(false);
-            return;
-        }
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            recStream.current = stream;
-            recChunks.current = [];
-            const rec = new MediaRecorder(stream);
-            recRef.current = rec;
-            rec.ondataavailable = (e) => { if (e.data.size) recChunks.current.push(e.data); };
-            rec.onstop = () => {
-                const blob = new Blob(recChunks.current, { type: 'audio/webm' });
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = 'medha-counselling-session.webm';
-                a.click();
-                setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-            };
-            rec.start();
-            setRecording(true);
-        } catch (e) {
-            downloadTranscript();
-        }
-    };
-
     const downloadTranscript = () => {
         const text = messages.map((m) => `${m.role === 'user' ? 'You' : 'Medha'}: ${m.content}`).join('\n\n');
         const a = document.createElement('a');
@@ -146,14 +104,6 @@ export default function CounsellingCall({ onNav }) {
         a.click();
         setTimeout(() => URL.revokeObjectURL(a.href), 5000);
         setMoreOpen(false);
-    };
-
-    const shareSession = async () => {
-        const data = { title: 'Medha Counselling', text: 'Join my career counselling session on Medha', url: window.location.href };
-        try {
-            if (navigator.share) await navigator.share(data);
-            else { await navigator.clipboard.writeText(window.location.href); }
-        } catch (e) {}
     };
 
     return (
@@ -200,17 +150,12 @@ export default function CounsellingCall({ onNav }) {
                             </h2>
                             <div className="h-[3px] w-10 mt-2 rounded-full" style={{ background: '#b06a2a' }} />
                         </div>
-                        <div className="hidden xl:flex items-end gap-3 pr-2 opacity-90">
-                            <svg width="72" height="56" viewBox="0 0 72 56"><rect x="8" y="10" width="46" height="32" rx="3" fill="#fff" stroke="#7a1f1f" strokeWidth="2" /><path d="M20 34l5-8 4 5 6-10" stroke="#7a1f1f" strokeWidth="2" fill="none" /><rect x="26" y="42" width="10" height="4" fill="#7a1f1f" /><rect x="14" y="46" width="34" height="3" rx="1.5" fill="#b06a2a" /></svg>
-                            <svg width="76" height="60" viewBox="0 0 76 60"><rect x="14" y="30" width="48" height="10" rx="2" fill="#c0392b" /><rect x="18" y="20" width="40" height="10" rx="2" fill="#e8802e" /><path d="M38 20L20 10l18-6 18 6-18 10z" fill="#4d0d0d" /><rect x="54" y="10" width="4" height="12" fill="#d9a03a" /><circle cx="56" cy="24" r="3" fill="#d9a03a" /></svg>
-                            <svg width="44" height="60" viewBox="0 0 44 60"><path d="M22 4a12 12 0 00-7 21.5c1.5 1.3 2 2.7 2 4.5h10c0-1.8.5-3.2 2-4.5A12 12 0 0022 4z" fill="#e8a83e" stroke="#b06a2a" strokeWidth="1.5" /><path d="M17 34h10M18 38h8" stroke="#7a1f1f" strokeWidth="2.5" /></svg>
-                        </div>
                         <div className="flex items-center gap-2">
                             <button className="w-9 h-9 rounded-full bg-white flex items-center justify-center shadow-sm" style={{ border: '1px solid #e8d5b5', color: '#8a5a2a' }}>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4l1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
                             </button>
-                            <button className="flex items-center gap-1 px-3.5 py-2 rounded-full bg-white text-[12px] font-bold shadow-sm" style={{ border: '1px solid #d9a679', color: '#4d0d0d' }}>
-                                EN
+                            <button onClick={() => setLang(lang === 'hi' ? 'en' : 'hi')} className="flex items-center gap-1 px-3.5 py-2 rounded-full bg-white text-[12px] font-bold shadow-sm" style={{ border: '1px solid #d9a679', color: '#4d0d0d' }}>
+                                {lang === 'hi' ? 'HI' : 'EN'}
                                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m6 9 6 6 6-6" /></svg>
                             </button>
                             <div className="w-9 h-9 rounded-full flex items-center justify-center text-[14px] font-bold text-white" style={{ background: '#9a8a76' }}>
@@ -222,10 +167,10 @@ export default function CounsellingCall({ onNav }) {
 
                 {/* Video tiles */}
                 <div className="flex-1 min-h-0 grid grid-cols-2 gap-4 px-6 py-2">
-                    {/* Medha tile */}
+                    {/* Medha tile — full-body frames land here next */}
                     <div className="relative rounded-2xl overflow-hidden shadow-lg" style={{ border: '1px solid #e8d5b5', background: 'linear-gradient(160deg, #f7e3c2 0%, #e9c9a0 45%, #c9a071 100%)' }}>
-                        <div className="absolute inset-0 flex items-center justify-center p-4">
-                            <Medha2DAvatar className="pointer-events-none select-none" style={{ maxWidth: '78%' }} />
+                        <div className="absolute inset-0">
+                            <MedhaAvatar className="pointer-events-none select-none" />
                         </div>
                         <div className="absolute bottom-3 left-3 flex items-center gap-2.5 px-3.5 py-2 rounded-xl" style={{ background: 'rgba(40,10,10,0.55)', backdropFilter: 'blur(6px)' }}>
                             <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#4caf7d', boxShadow: '0 0 0 3px rgba(76,175,125,0.3)' }} />
@@ -268,7 +213,7 @@ export default function CounsellingCall({ onNav }) {
                 {/* Call controls */}
                 <div className="flex justify-center pb-3 pt-1 shrink-0">
                     <div className="flex items-end gap-4 px-6 py-3 rounded-2xl bg-white shadow-lg" style={{ border: '1px solid #efdfc2' }}>
-                        <CtrlBtn label={muted ? 'Unmute' : 'Mute'} active={muted} onClick={() => { setMuted(!muted); setIsCallMode(muted); }}>
+                        <CtrlBtn label={muted ? 'Unmute' : 'Mute'} active={muted} onClick={() => { const next = !muted; setMuted(next); setIsCallMode(!next); if (next) stopSpeaking(); }}>
                             {muted
                                 ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" /><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M2 2l20 20" /></svg>
                                 : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" /><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8" /></svg>}
@@ -276,8 +221,8 @@ export default function CounsellingCall({ onNav }) {
                         <CtrlBtn label="Camera" active={!camOn} onClick={() => setCamOn(!camOn)}>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="6" width="13" height="12" rx="2" /><path d="M15 10l7-3v10l-7-3" /></svg>
                         </CtrlBtn>
-                        <CtrlBtn label="Share" onClick={shareSession}>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="13" rx="2" /><path d="M8 21h8M12 17v4" /></svg>
+                        <CtrlBtn label="Human" onClick={() => setShowEscalation(true)}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="8" r="3.2" /><path d="M3.5 20c0-3.4 2.5-5.5 5.5-5.5s5.5 2.1 5.5 5.5" /><circle cx="17" cy="9" r="2.4" /><path d="M15.5 14.6c2.9.3 5 2.4 5 5.4" /></svg>
                         </CtrlBtn>
                         <CtrlBtn label="End Call" danger onClick={() => goHome('home')}>
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 11l18-7-7 18-2.5-7.5L3 11z" transform="rotate(135 12 12)" /></svg>
@@ -285,17 +230,13 @@ export default function CounsellingCall({ onNav }) {
                         <CtrlBtn label="Captions" active={captionsOn} onClick={() => setCaptionsOn(!captionsOn)}>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M10 10.5a2.5 2.5 0 00-4 2 2.5 2.5 0 004 2M18 10.5a2.5 2.5 0 00-4 2 2.5 2.5 0 004 2" /></svg>
                         </CtrlBtn>
-                        <CtrlBtn label="Record" active={recording} onClick={toggleRecord}>
-                            <span className="w-[18px] h-[18px] rounded-full" style={{ border: '2px solid currentColor' }}>
-                                <span className="block w-[8px] h-[8px] rounded-full mx-auto mt-[3px]" style={{ background: recording ? '#fff' : '#c0392b' }} />
-                            </span>
-                        </CtrlBtn>
                         <div className="relative">
                             <CtrlBtn label="More" onClick={() => setMoreOpen(!moreOpen)}>
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="19" cy="12" r="1.8" /></svg>
                             </CtrlBtn>
                             {moreOpen && (
-                                <div className="absolute bottom-full mb-2 right-0 w-48 rounded-xl bg-white shadow-xl overflow-hidden" style={{ border: '1px solid #e8d5b5' }}>
+                                <div className="absolute bottom-full mb-2 right-0 w-52 rounded-xl bg-white shadow-xl overflow-hidden" style={{ border: '1px solid #e8d5b5' }}>
+                                    <button onClick={() => { setMoreOpen(false); setShowEscalation(true); }} className="w-full text-left px-4 py-2.5 text-[12.5px] font-bold hover:bg-amber-50" style={{ color: '#7a1f1f' }}>Request human counsellor</button>
                                     <button onClick={downloadTranscript} className="w-full text-left px-4 py-2.5 text-[12.5px] hover:bg-amber-50" style={{ color: '#4d0d0d' }}>Download transcript</button>
                                     <button onClick={() => { createSession(); setMoreOpen(false); }} className="w-full text-left px-4 py-2.5 text-[12.5px] hover:bg-amber-50" style={{ color: '#4d0d0d' }}>New chat</button>
                                     <button onClick={() => goHome('home')} className="w-full text-left px-4 py-2.5 text-[12.5px] hover:bg-amber-50" style={{ color: '#4d0d0d' }}>Back to home</button>
@@ -312,7 +253,6 @@ export default function CounsellingCall({ onNav }) {
                     <div className="flex items-center gap-1.5 px-3 pt-3 shrink-0">
                         {[
                             { id: 'chat', label: 'Chat', icon: (<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="4" /><path d="M12 8v6M9 11h6" /></svg>) },
-                            { id: 'notes', label: 'Notes', icon: (<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2h9l5 5v15H6z" /><path d="M14 2v6h6" /></svg>) },
                             { id: 'resources', label: 'Resources', icon: (<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19V5a2 2 0 012-2h13v16H6a2 2 0 00-2 2zm0 0a2 2 0 002 2h13" /></svg>) },
                         ].map((t) => (
                             <button
@@ -347,17 +287,6 @@ export default function CounsellingCall({ onNav }) {
                             </div>
                         </>
                     )}
-                    {tab === 'notes' && (
-                        <div className="flex-1 min-h-0 p-3 flex flex-col">
-                            <textarea
-                                value={notes}
-                                onChange={(e) => saveNotes(e.target.value)}
-                                placeholder="Session notes — saved automatically..."
-                                className="flex-1 w-full p-3 rounded-xl text-[12.5px] outline-none resize-none"
-                                style={{ background: '#f8efdc', color: '#4d0d0d', border: '1px solid #e8d5b5' }}
-                            />
-                        </div>
-                    )}
                     {tab === 'resources' && (
                         <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-2 kaushal-scroll">
                             {RESOURCES.map((r) => (
@@ -370,6 +299,7 @@ export default function CounsellingCall({ onNav }) {
                     )}
                 </div>
             </div>
+            {showEscalation && <EscalationModal onClose={() => setShowEscalation(false)} />}
         </div>
     );
 }
