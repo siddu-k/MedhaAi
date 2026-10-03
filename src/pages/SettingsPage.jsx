@@ -51,6 +51,17 @@ export default function SettingsPage() {
         setTimeout(() => setKeySavedStatus(''), 3000);
     };
 
+    const envDefaultKey = import.meta.env.VITE_GEMINI_API_KEY || '';
+    const isUsingEnvDefault = geminiApiKey && envDefaultKey && geminiApiKey === envDefaultKey;
+
+    const handleResetToEnv = () => {
+        try { localStorage.removeItem('tyloop_gemini_api_key'); } catch (e) {}
+        setGeminiApiKey(envDefaultKey);
+        setApiKeyInput(envDefaultKey);
+        setKeySavedStatus(envDefaultKey ? 'Reset to env default!' : 'No env default set');
+        setTimeout(() => setKeySavedStatus(''), 3000);
+    };
+
     const handleTestApiKey = async () => {
         const keyToTest = apiKeyInput.trim() || geminiApiKey;
         if (!keyToTest) {
@@ -276,6 +287,21 @@ export default function SettingsPage() {
                                             {keySavedStatus && (
                                                 <span className="text-xs text-emerald-400 font-medium animate-in fade-in">{keySavedStatus}</span>
                                             )}
+                                            <span className="text-[11px] text-zinc-500">
+                                                {envDefaultKey
+                                                    ? (isUsingEnvDefault ? '● Using Vercel/.env default key' : '● Env default available — custom override active')
+                                                    : '○ No env default — add VITE_GEMINI_API_KEY in .env / Vercel'}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <button
+                                                onClick={handleResetToEnv}
+                                                disabled={!envDefaultKey}
+                                                className="px-4 py-2 bg-transparent text-zinc-400 hover:text-zinc-100 font-medium rounded-lg text-xs transition-all disabled:opacity-30 border border-zinc-800"
+                                                title="Clear custom key and fall back to VITE_GEMINI_API_KEY from .env / Vercel"
+                                            >
+                                                Reset to Env Default
+                                            </button>
                                         </div>
 
                                         {testResult && (
