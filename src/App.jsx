@@ -21,9 +21,10 @@ export default function App() {
         return () => { try { unsub?.(); } catch (e) {} clearTimeout(t); };
     }, []);
 
-    if (!userName || currentPage === 'landing') {
-        return <LandingPage />;
-    }
+    // TEMP BYPASS landing/login — restore to re-enable
+    // if (!userName || currentPage === 'landing') {
+    //     return <LandingPage />;
+    // }
 
     switch (currentPage) {
         case 'settings':
